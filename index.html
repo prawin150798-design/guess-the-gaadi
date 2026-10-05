@@ -167,10 +167,33 @@ const CARS_FALLBACK=[
 {"n": "Bentley Continental GT", "b": "Bentley", "s": "a luxury grand tourer", "c": ["It is a big luxury coupe from Crewe.", "It has a hand-stitched interior."], "f": "It is a favourite among luxury buyers.", "i": "Sold in India. W12 or V8."}
 ];
 const INFO={"Tata Nano": "Launched 2008. 624cc twin-cylinder petrol.", "Hindustan Ambassador": "Built 1958 to 2014. 1.5L petrol and diesel.", "Maruti 800": "Launched 1983. 796cc petrol.", "Premier Padmini": "Launched 1964. 1.1L petrol.", "Mahindra Thar": "Launched 2010. 2020 update in second generation.", "Tata Sierra": "Launched 1991. 2.0L turbo-diesel.", "Maruti Suzuki Jimny": "Five-door India launch 2023. 1.5L petrol.", "Hyundai Santro": "Launched 1998. 1.1L petrol.", "Tata Safari": "Launched 1998. 2.0L diesel.", "Mahindra Scorpio": "Launched 2002. Diesel engine.", "Hindustan Contessa": "Launched 1984. 1.8L petrol.", "Toyota Innova": "Launched 2005. Diesel and petrol.", "Maruti Suzuki Gypsy": "Launched 1985. 1.3L petrol.", "Tata Punch": "Launched 2021. 1.2L petrol."};
-const DB={"Maruti Suzuki": ["800", "Alto", "Alto K10", "S-Presso", "Wagon R", "Celerio", "Ignis", "Swift", "Dzire", "Baleno", "Fronx", "Brezza", "Victoris", "Grand Vitara", "Ertiga", "XL6", "Invicto", "Jimny", "Eeco", "e Vitara", "Omni", "Gypsy", "Zen"], "Tata": ["Tiago", "Tiago EV", "Tigor", "Altroz", "Punch", "Punch EV", "Nexon", "Nexon EV", "Curvv", "Curvv EV", "Harrier", "Harrier EV", "Safari", "Sierra", "Aeris", "Indica", "Nano"], "Mahindra": ["Thar", "Thar Roxx", "Scorpio", "Scorpio N", "Scorpio Classic", "Bolero", "Bolero Neo", "XUV 3XO", "XUV700", "XUV 7XO", "XUV500", "XEV 9e", "XEV 9S", "BE 6", "Marazzo"], "Hyundai": ["Grand i10 Nios", "Aura", "i20", "Exter", "Venue", "Verna", "Creta", "Creta Electric", "Alcazar", "Tucson", "Ioniq 5", "Santro"], "Kia": ["Sonet", "Seltos", "Syros", "Carens", "Carens Clavis", "Carnival", "EV6", "EV9"], "Toyota": ["Glanza", "Urban Cruiser Taisor", "Urban Cruiser Hyryder", "Rumion", "Innova", "Innova Crysta", "Innova Hycross", "Fortuner", "Hilux", "Camry", "Vellfire", "Land Cruiser 300"], "Honda": ["Amaze", "City", "Elevate"], "MG": ["Comet EV", "Astor", "Hector", "Windsor EV", "ZS EV", "Gloster", "M9", "Cyberster"], "Skoda": ["Kylaq", "Kushaq", "Slavia", "Kodiaq", "Superb", "Octavia RS"], "Volkswagen": ["Virtus", "Taigun", "Tiguan", "Golf GTI"], "Renault": ["Kwid", "Triber", "Kiger", "Duster"], "Nissan": ["Magnite", "Gravite", "Tekton", "X-Trail"], "Citroen": ["C3", "eC3", "Aircross", "Basalt", "C5 Aircross"], "Jeep": ["Compass", "Meridian", "Wrangler", "Grand Cherokee"], "Isuzu": ["D-Max V-Cross", "Hi-Lander", "MU-X"], "BYD": ["Atto 3", "Seal", "Sealion 7", "eMAX 7"], "VinFast": ["VF 6", "VF 7"], "Mercedes-Benz": ["C-Class", "E-Class", "S-Class", "GLA", "GLC", "GLE", "GLS", "G-Class", "EQS", "Maybach S-Class"], "BMW": ["2 Series Gran Coupe", "3 Series", "5 Series", "7 Series", "X1", "X3", "X5", "X7", "iX1", "i7"], "Audi": ["A4", "A6", "Q3", "Q5", "Q7", "Q8", "e-tron GT"], "Volvo": ["EX30", "EX40", "XC60", "XC90"], "Lexus": ["ES", "NX", "RX", "LM", "LX"], "Porsche": ["Macan", "Cayenne", "Panamera", "911", "Taycan"], "Land Rover": ["Defender", "Discovery", "Range Rover", "Range Rover Sport", "Velar", "Evoque"], "Mini": ["Cooper", "Countryman"], "Lamborghini": ["Urus", "Revuelto"], "Ferrari": ["Purosangue", "296 GTB", "Roma"], "Rolls-Royce": ["Ghost", "Cullinan"], "Bentley": ["Continental GT", "Flying Spur", "Bentayga"], "Aston Martin": ["DB12", "Vantage"], "Lotus": ["Emira", "Eletre"], "Force": ["Gurkha"], "Bajaj": ["Qute"], "Hindustan Motors": ["Ambassador", "Contessa"], "Premier": ["Padmini"], "Ford": ["EcoSport", "Figo", "Endeavour"]};
+let DB = {};
 const BA={Maruti:'Maruti Suzuki',Hindustan:'Hindustan Motors'};
 const bm=c=>BA[c.b]||c.b;
-const mm=c=>c.n.replace(new RegExp('^('+Object.keys(DB).concat(['Maruti','Hindustan']).sort((a,b)=>b.length-a.length).join('|')+') '),'');
+const mm = c => {
+  const brand = bm(c);
+
+  if (c.n.startsWith(brand + " "))
+    return c.n.slice(brand.length + 1);
+
+  if (c.n.startsWith(c.b + " "))
+    return c.n.slice(c.b.length + 1);
+
+  return c.n;
+};
+function buildDB(cars) {
+  const db = {};
+
+  cars.forEach(car => {
+    const brand = bm(car);
+    const model = mm(car);
+
+    if (!db[brand]) db[brand] = [];
+    if (!db[brand].includes(model)) db[brand].push(model);
+  });
+
+  return db;
+}
 const app=document.getElementById("app");
 let QUESTIONS,deck,i,lvl,score,streak,best=0,results,tried;
 try{best=+localStorage.getItem("gtg-best")||0}catch(e){}
@@ -184,13 +207,11 @@ const GROUPS=[
 ["Lamborghini","Ferrari","Rolls-Royce","Bentley","Aston Martin","Lotus"],
 ["Hindustan Motors","Premier","Bajaj"]
 ];
-function buildBrandOpts(correct){
- const group=GROUPS.find(g=>g.includes(correct))||Object.keys(DB);
- let rivals=shuffle(group.filter(b=>b!==correct));
- let opts=[correct,...rivals.slice(0,4)];
- let pool=shuffle(Object.keys(DB).filter(b=>!opts.includes(b)));
- while(opts.length<5&&pool.length)opts.push(pool.pop());
- return shuffle(opts);
+function buildBrandOpts(correct) {
+  const brands = Object.keys(DB);
+  const rivals = shuffle(brands.filter(b => b !== correct));
+
+  return shuffle([correct, ...rivals.slice(0, 4)]);
 }
 function buildQuestions(){
  const qs=[];
@@ -274,7 +295,8 @@ async function loadCars(){
 }
 (async function init(){
  app.innerHTML='<div class="plate"><p class="sub">Loading questions&hellip;</p></div>';
- CARS=await loadCars();
+ CARS = await loadCars();
+ DB = buildDB(CARS);
  start();
 })();
 </script>
