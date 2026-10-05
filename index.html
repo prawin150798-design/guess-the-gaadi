@@ -80,7 +80,7 @@ footer.site{max-width:560px;margin:24px auto 0;padding:16px;text-align:center;fo
 </div>
 <footer class="site">&copy; 2026 Guess the Gaadi &middot; An Indian car trivia game &middot; Last published 29 Sep 2026</footer>
 <script>
-const CARS=[
+const CARS_FALLBACK=[
 {n:"Tata Nano",b:"Tata",s:"a tiny rear-engined city car from 2008",c:["Early versions had no external boot lid, so you loaded luggage from inside the cabin.","It ran on just one windshield wiper."],f:"Launched with the promise of a ₹1 lakh price tag, its 624cc twin-cylinder engine sits at the back."},
 {n:"Hindustan Ambassador",b:"Hindustan",s:"a rounded sedan built from 1958 to 2014",c:["Its bonnet and body shape came from Britain's Morris Oxford III.","For decades it was the default car for government officials."],f:"Nicknamed the 'King of Indian roads', it stayed in production for over five decades."},
 {n:"Maruti 800",b:"Maruti",s:"a small hatchback that launched in 1983",c:["Its first buyer received the keys at a ceremony in December 1983.","A 796cc three-cylinder engine powered it."],f:"It put middle-class India on wheels and stayed on sale for about three decades."},
@@ -257,7 +257,26 @@ function end(){
   const done=()=>document.getElementById("m").textContent="Copied. Paste it to challenge a friend.";
   try{navigator.clipboard.writeText(txt).then(done,()=>document.getElementById("m").textContent=txt)}catch(e){document.getElementById("m").textContent=txt}};
 }
-start();
+let CARS=CARS_FALLBACK;
+const JSONBIN_URL="https://api.jsonbin.io/v3/b/6ac3925cac6210605a1552bf/latest";
+async function loadCars(){
+ try{
+  const res=await fetch(JSONBIN_URL,{cache:"no-store"});
+  if(!res.ok)throw new Error("bad status "+res.status);
+  const data=await res.json();
+  const record=data&&data.record;
+  if(Array.isArray(record)&&record.length)return record;
+  throw new Error("empty or malformed record");
+ }catch(e){
+  console.warn("Falling back to built-in questions:",e);
+  return CARS_FALLBACK;
+ }
+}
+(async function init(){
+ app.innerHTML='<div class="plate"><p class="sub">Loading questions&hellip;</p></div>';
+ CARS=await loadCars();
+ start();
+})();
 </script>
 </body>
 </html>
