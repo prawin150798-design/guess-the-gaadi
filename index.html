@@ -172,26 +172,20 @@ const BA={Maruti:'Maruti Suzuki',Hindustan:'Hindustan Motors'};
 const bm=c=>BA[c.b]||c.b;
 const mm = c => {
   const brand = bm(c);
-
   if (c.n.startsWith(brand + " "))
     return c.n.slice(brand.length + 1);
-
   if (c.n.startsWith(c.b + " "))
     return c.n.slice(c.b.length + 1);
-
   return c.n;
 };
 function buildDB(cars) {
   const db = {};
-
   cars.forEach(car => {
     const brand = bm(car);
     const model = mm(car);
-
     if (!db[brand]) db[brand] = [];
     if (!db[brand].includes(model)) db[brand].push(model);
   });
-
   return db;
 }
 const app=document.getElementById("app");
@@ -207,11 +201,15 @@ const GROUPS=[
 ["Lamborghini","Ferrari","Rolls-Royce","Bentley","Aston Martin","Lotus"],
 ["Hindustan Motors","Premier","Bajaj"]
 ];
-function buildBrandOpts(correct) {
-  const brands = Object.keys(DB);
-  const rivals = shuffle(brands.filter(b => b !== correct));
-
-  return shuffle([correct, ...rivals.slice(0, 4)]);
+function buildBrandOpts(correct){
+ const allBrands=Object.keys(DB);
+ const group=GROUPS.find(g=>g.includes(correct));
+ const groupCandidates=group?group.filter(b=>b!==correct&&allBrands.includes(b)):[];
+ let rivals=shuffle(groupCandidates);
+ let opts=[correct,...rivals.slice(0,4)];
+ let pool=shuffle(allBrands.filter(b=>!opts.includes(b)));
+ while(opts.length<5&&pool.length)opts.push(pool.pop());
+ return shuffle(opts);
 }
 function buildQuestions(){
  const qs=[];
@@ -295,8 +293,8 @@ async function loadCars(){
 }
 (async function init(){
  app.innerHTML='<div class="plate"><p class="sub">Loading questions&hellip;</p></div>';
- CARS = await loadCars();
- DB = buildDB(CARS);
+ CARS=await loadCars();
+ DB=buildDB(CARS);
  start();
 })();
 </script>
